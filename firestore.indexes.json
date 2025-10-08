@@ -1,0 +1,60 @@
+[
+  {
+    "collectionGroup": "meetings",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "participants",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "meetingTime",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ]
+  },
+  {
+    "collectionGroup": "meetings",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "meetingTime",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ]
+  },
+  {
+    "collectionGroup": "meetings",
+    "queryScope": "COLLECTION",
+    "fields": [
+      {
+        "fieldPath": "courseId",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "status",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "meetingTime",
+        "order": "ASCENDING"
+      },
+      {
+        "fieldPath": "__name__",
+        "order": "ASCENDING"
+      }
+    ]
+  }
+]
