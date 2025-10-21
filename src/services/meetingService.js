@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, query, where, orderBy, doc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, orderBy, doc, updateDoc, arrayUnion, arrayRemove, getDoc, runTransaction } from 'firebase/firestore';
 import { db } from './firebase';
 import { sendMeetingNotification, sendMeetingCreatedNotification } from './notificationService';
 
@@ -81,58 +81,67 @@ export const searchMeetingsByCourse = async (courseId) => {
 };
 
 /**
- * Adds a user to a study meeting.
+ * Adds a user to a study meeting using a transaction to prevent race conditions.
  * @param {string} meetingId - The ID of the meeting to join.
  * @param {string} userId - The ID of the user joining.
  * @param {string} userEmail - The email of the user joining.
  * @param {string} userName - The name of the user joining.
- * @returns {Promise<boolean>} True if the user successfully joined.
+ * @returns {Promise<void>}
  */
 // Join a meeting
 export const joinMeeting = async (meetingId, userId, userEmail, userName) => {
   try {
-    const meetingRef = doc(db, 'meetings', meetingId);
-    
-    // Get current meeting data
-    const meetingDoc = await getDoc(meetingRef);
-    if (!meetingDoc.exists()) {
-      throw new Error('Meeting not found');
-    }
-    
-    const meetingData = meetingDoc.data();
-    
-    // Check if meeting is full
-    if (meetingData.participants?.length >= meetingData.maxParticipants) {
-      throw new Error('Meeting is full');
-    }
-    
-    // Check if user is already in the meeting
-    if (meetingData.participants?.some(p => p.id === userId)) {
-      throw new Error('You are already in this meeting');
-    }
-    
-    const newParticipant = {
-      id: userId,
-      email: userEmail,
-      name: userName,
-      joinedAt: new Date()
-    };
-    
-    await updateDoc(meetingRef, {
-      participants: arrayUnion(newParticipant),
-      participantIds: arrayUnion(userId) // Add user's ID to participantIds
+    const meetingDataForNotification = await runTransaction(db, async (transaction) => {
+      const meetingRef = doc(db, 'meetings', meetingId);
+      const meetingDoc = await transaction.get(meetingRef);
+
+      if (!meetingDoc.exists()) {
+        throw new Error('Meeting not found');
+      }
+
+      const meetingData = meetingDoc.data();
+
+      // Check if user is already in the meeting
+      if (meetingData.participants?.some(p => p.id === userId)) {
+        // We throw a specific error message to handle it gracefully in the UI
+        throw new Error('You are already in this meeting');
+      }
+
+      // Check if the meeting is full
+      if (meetingData.participants?.length >= meetingData.maxParticipants) {
+        throw new Error('This meeting is full');
+      }
+
+      const newParticipant = {
+        id: userId,
+        email: userEmail,
+        name: userName,
+        joinedAt: new Date()
+      };
+
+      const updatedParticipants = [...(meetingData.participants || []), newParticipant];
+      const updatedParticipantIds = [...(meetingData.participantIds || []), userId];
+
+      transaction.update(meetingRef, {
+        participants: updatedParticipants,
+        participantIds: updatedParticipantIds
+      });
+
+      // Return data for notification
+      return { ...meetingData, participants: updatedParticipants };
     });
-    
-    // Send notification to the user who joined
-    await sendMeetingNotification(
-      { ...meetingData, participants: [...(meetingData.participants || []), newParticipant] },
-      userEmail,
-      userName
-    );
-    
-    return true;
+
+    // Send notification after successful transaction
+    if (meetingDataForNotification) {
+      await sendMeetingNotification(
+        meetingDataForNotification,
+        userEmail,
+        userName
+      );
+    }
   } catch (error) {
     console.error('Error joining meeting:', error);
+    // Re-throw the error to be caught by the UI and display a toast message
     throw error;
   }
 };

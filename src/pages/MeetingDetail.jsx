@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
@@ -64,7 +65,7 @@ export default function MeetingDetail() {
       // If less than 1 person remaining, delete the meeting
       if (updatedParticipants.length < 1) {
         await deleteDoc(meetingRef);
-        alert('You left the meeting. Since you were the last participant, the meeting has been deleted.');
+        toast.success('You left the meeting. Since you were the last participant, the meeting has been deleted.');
         navigate('/dashboard');
         return;
       }
@@ -77,7 +78,7 @@ export default function MeetingDetail() {
       // Reload meeting data
       await loadMeeting();
       
-      alert('Successfully left the meeting!');
+      toast.success('Successfully left the meeting!');
     } catch (error) {
       console.error('Error leaving meeting:', error);
       setError('Failed to leave meeting');
@@ -105,7 +106,7 @@ export default function MeetingDetail() {
       const meetingRef = doc(db, 'meetings', meetingId);
       await deleteDoc(meetingRef);
       
-      alert('Meeting deleted successfully!');
+      toast.success('Meeting deleted successfully!');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error deleting meeting:', error);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { getAllMeetings, searchMeetingsByCourse, joinMeeting } from '../services/meetingService';
 import { Calendar, MapPin, Users, Search, BookOpen } from 'lucide-react';
@@ -50,6 +51,27 @@ export default function FindMeeting() {
   };
 
   const handleJoinMeeting = async (meetingId) => {
+    const originalMeetings = [...meetings];
+    
+    // Optimistic update
+    setMeetings(currentMeetings =>
+      currentMeetings.map(m =>
+        m.id === meetingId
+          ? {
+              ...m,
+              participants: [
+                ...m.participants,
+                {
+                  id: currentUser.uid,
+                  name: currentUser.displayName || currentUser.email.split('@')[0],
+                  email: currentUser.email,
+                },
+              ],
+            }
+          : m
+      )
+    );
+
     try {
       setJoiningMeeting(meetingId);
       setError('');
@@ -61,13 +83,11 @@ export default function FindMeeting() {
         currentUser.displayName || currentUser.email.split('@')[0]
       );
       
-      // Reload meetings to show updated participant count
-      await loadAllMeetings();
-      
-      // Show success message
-      alert('Successfully joined the meeting! You will receive an email notification.');
+      toast.success('Successfully joined the meeting!');
     } catch (error) {
-      setError('Failed to join meeting. You may already be a participant.');
+      // Rollback on error
+      setMeetings(originalMeetings);
+      toast.error(error.message || 'Failed to join meeting.');
     } finally {
       setJoiningMeeting(null);
     }

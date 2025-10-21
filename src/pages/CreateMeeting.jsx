@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { createMeeting } from '../services/meetingService';
 import { Calendar, MapPin, Users, BookOpen } from 'lucide-react';
@@ -55,7 +56,7 @@ export default function CreateMeeting() {
       const meetingId = await createMeeting(meetingData);
       console.log('Meeting created with ID:', meetingId);
       
-      alert('Meeting created successfully!');
+      toast.success('Meeting created successfully!');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error creating meeting:', error);
