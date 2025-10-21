@@ -1,6 +1,6 @@
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate, Link } from 'react-router-dom';
-import { Home, Calendar, Plus, Search, LogOut } from 'lucide-react';
+import { Calendar, Plus, Search, LogOut } from 'lucide-react';
 
 /**
  * Header component for the application.
@@ -30,13 +30,6 @@ export default function Header() {
               <Link to="/">Study Group Finder</Link>
             </h1>
             <nav className="flex space-x-4">
-              <Link
-                to="/"
-                className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              >
-                <Home className="w-4 h-4 mr-1" />
-                Home
-              </Link>
               <Link
                 to="/dashboard"
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100"
@@ -80,3 +73,4 @@ export default function Header() {
     </header>
   );
 }
+

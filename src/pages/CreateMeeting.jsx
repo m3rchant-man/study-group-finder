@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { createMeeting } from '../services/meetingService';
-import { Calendar, MapPin, Users, BookOpen, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, Users, BookOpen } from 'lucide-react';
 
 export default function CreateMeeting() {
   const { currentUser } = useAuth();
@@ -75,22 +75,6 @@ export default function CreateMeeting() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center py-4">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
-            </button>
-            <h1 className="text-xl font-bold text-gray-900">Create Study Meeting</h1>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-md p-8">
